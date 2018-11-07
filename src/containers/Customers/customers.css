@@ -1,0 +1,18 @@
+.ant-tabs-nav .ant-tabs-tab {
+    display: inline-block;
+    height: 100%;
+    margin: 0 32px 0 0;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    position: relative;
+    transition: color 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    cursor: pointer;
+    text-decoration: none;
+    color: darkblue;
+    font-weight: 600;
+    background-color: grey;
+    width: 50%;
+}
+.fcfmNQ.ant-btn.ant-btn-primary {
+    background-color: #062760;
+}
