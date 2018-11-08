@@ -8,6 +8,7 @@ import Button from '../../components/uielements/button';
 import { rtl } from '../../settings/withDirection';
 import Service from './service';
 import axios from '../../axios';
+import moment from 'moment';
 
 let lat =0;
 const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
@@ -24,7 +25,8 @@ class ServicesList extends Component {
     serviceForm: true,
     serviceSave: true,
     serviceSubmit: true,
-    serviceTitle: 'SERVICE LIST'
+    serviceTitle: 'SERVICE LIST',
+    service: ''
   };
 
  }
@@ -33,13 +35,15 @@ lat++;
 return lat;
  }
  componentDidMount() {
-   this.getService();
- }
+  this.getService();
+}
  getService() {
   let self =this;
   axios.get('/api/admin/service',
   {headers: { 'Content-Type': 'application/json', Authorization: "Bearer " + token }})
   .then(function (response) {
+    console.log('eceacf');
+    console.log(response.data);
      self.setState({value: response.data });
   })
   .catch(function (error) {
@@ -64,21 +68,19 @@ cancelService() {
     serviceTitle: 'SERVICE LIST' 
   });
 }
-editService() {
+editService(val) {
   this.setState({
     serviceForm: false,
     serviceSubmit: true,
     serviceTable: true,
     serviceSave: false,
-    serviceTitle: 'EDIT SERVICE' 
+    serviceTitle: 'EDIT SERVICE',
+    service: val
   });
 }
  addCat() {
   this.props.history.push('/admin/category/add');
  }
-  componentDidMount() {
-  
-  }
 
   render() {
     const margin = {
@@ -87,34 +89,24 @@ editService() {
     };
     const columns = [
       {
-        title: 'Name',
-        dataIndex: 'name',
+        title: 'Completed Date',
+        dataIndex: 'CompletedDate',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
-        sorter: (a, b) => a.Name.localeCompare(b.Name)
-      },
-      {
-        title: 'Driver',
-        dataIndex: 'driver',
-        onFilter: (value, record) => record.Name.indexOf(value) === 0,
-        sorter: (a, b) => a.Name.localeCompare(b.Name)
-      }, 
-      {
-        title: 'Service',
-        dataIndex: 'service',
-        onFilter: (value, record) => record.Name.indexOf(value) === 0,
-        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
+        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : '',
+        render: (record) => <div> {moment(record).format("DD/MM/YYYY")}</div>
        
       },
       {
         title: 'Requested Date',
-        dataIndex: 'reqDt',
+        dataIndex: 'RequestedDate',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
-        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
+        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : '',
+        render: (record) => <div> {moment(record).format("DD/MM/YYYY")}</div>
        
       },
       {
-        title: 'Completed Date',
-        dataIndex: 'compDt',
+        title: 'Notes',
+        dataIndex: 'Notes',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
@@ -135,7 +127,7 @@ editService() {
       },
       {
         title: 'Action', 
-        render: (record) => <div  onClick={()=>  this.editService() }> <Icon type="edit" className="isoEditIcon"/></div>
+        render: (record) => <div style={{cursor:'pointer'}}  onClick={()=>  this.editService(record) }> <Icon type="edit" className="isoEditIcon"/></div>
       }
     ];
     return (
@@ -143,7 +135,7 @@ editService() {
       <div hidden={this.state.serviceTable}>
 
        <Button type="primary"  onClick={()=>{ this.addService() }} style={{float: 'right'}} >
-                         Add service
+                         Add Service
                         </Button>
     
                         <br/><br/>
@@ -155,7 +147,7 @@ editService() {
         </div>
         <div  hidden={this.state.serviceForm}>
         <span>
-        <Service  add ={this.state.serviceSubmit} update={this.state.serviceSave}/>
+        <Service  add ={this.state.serviceSubmit} update={this.state.serviceSave} service={this.state.service}/>
        
                         <Button type='primary' htmlType="submit" style={margin} onClick={()=>{ this.cancelService() }}>
                           CANCEL

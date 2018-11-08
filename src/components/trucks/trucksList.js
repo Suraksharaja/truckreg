@@ -23,7 +23,8 @@ class TrucksList extends Component {
     truckForm: true,
     truckSave: true,
     truckSubmit: true,
-    truckTitle: 'TRUCKS LIST'
+    truckTitle: 'TRUCKS LIST',
+    truck: []
 
   };
 
@@ -46,13 +47,14 @@ cancelTruck() {
     truckTitle: 'TRUCKS LIST' 
   });
 }
-editTruck() {
+editTruck(val) {
   this.setState({
     truckForm: false,
     truckSubmit: true,
     truckTable: true,
     truckSave: false,
-    truckTitle: 'EDIT TRUCK' 
+    truckTitle: 'EDIT TRUCK',
+    truck: val
   });
 }
  upadte() {
@@ -85,72 +87,72 @@ getTruck() {
     const columns = [
       {
         title: 'Truck Number',
-        dataIndex: 'Name',
+        dataIndex: 'TruckNumber',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Name.localeCompare(b.Name)
       }, 
       {
         title: 'VIN',
-        dataIndex: 'Email',
+        dataIndex: 'VIN',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
       },
       {
         title: 'License Plate ',
-        dataIndex: 'Phone',
+        dataIndex: 'LicensePlate',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
       },
       {
         title: 'Registeterd State ',
-        dataIndex: 'Role',
+        dataIndex: 'RegisteredState',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
       },
       {
         title: 'Make',
-        dataIndex: 'Name',
+        dataIndex: 'Make',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Name.localeCompare(b.Name)
       }, 
       {
         title: 'Year ',
-        dataIndex: 'Email',
+        dataIndex: 'Year',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
       },
       {
         title: 'Model',
-        dataIndex: 'Phone',
+        dataIndex: 'Model',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
       },
       {
         title: 'RegisteredDate ',
-        dataIndex: 'Phone',
+        dataIndex: 'RegisteredDate',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
       },
       {
         title: 'RenewalDate ',
-        dataIndex: 'Phone',
+        dataIndex: 'RenewalDate',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
       },
-      // {
-      //   title: '90DaysInspectionDate ',
-      //   dataIndex: 'Phone',
-      //   onFilter: (value, record) => record.Name.indexOf(value) === 0,
-      //   sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
+      {
+        title: '90DaysInspectionDate ',
+        dataIndex: 'NinetyDaysInspectionDate',
+        onFilter: (value, record) => record.Name.indexOf(value) === 0,
+        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
-      // },
+      },
       // {
       //   title: 'YearlyInspectionDate  ',
       //   dataIndex: 'Phone',
@@ -158,23 +160,10 @@ getTruck() {
       //   sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
       // },
-      {
-        title: 'Active',
-        dataIndex: 'isActive',
-        filters: [{
-          text: 'active',
-          value: 1,
-        }, {
-          text: 'inactive',
-          value: 0,
-        }], 
-        filterMultiple: false,
-        onFilter: (value, record) => record.isActive === JSON.parse(value),
-        render: (record) => <div> {record === 1 ? 'Yes' : 'No'}</div>
-      },
+      
       {
         title: 'Action', 
-        render: (record) => <div onClick = {() =>this.editTruck() }> <Icon type="edit" className="isoEditIcon"/></div>
+      render: (record) => <div style={{cursor:'pointer'}} onClick = {() =>this.editTruck(record) }> <Icon type="edit" className="isoEditIcon"/></div>
       }
     ];
     return (
@@ -195,7 +184,7 @@ getTruck() {
         </div>
         <div  hidden={this.state.truckForm}>
         <span>
-        <Truck  add ={this.state.truckSubmit} update={this.state.truckSave}/>
+        <Truck  add ={this.state.truckSubmit} update={this.state.truckSave} truck={this.state.truck}/>
        
                         <Button type='primary' htmlType="submit" style={margin} onClick={()=>{ this.cancelTruck() }}>
                           CANCEL

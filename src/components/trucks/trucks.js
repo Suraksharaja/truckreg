@@ -8,6 +8,7 @@ import Button from '../../components/uielements/button';
 import axios from '../../axios';
 import notification from '../../components/notification';
 import { PropTypes } from 'prop-types';
+import moment from 'moment';
 
 const FormItem = Form.Item;
 const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
@@ -38,7 +39,46 @@ class Truck extends Component {
     };
    this.handleChange = this.handleChange.bind(this);
   }
-
+  componentDidUpdate(prevProps, prevState) {
+    console.log('finally got here');
+    console.log(prevProps.truck);
+    if(prevProps.truck !== this.props.truck) {
+      this.getTruckDetails();
+    
+    } 
+  }
+  getTruckDetails() {
+    console.log('yes calling');
+    let self =this;
+    const { form } = self.props;
+   const truck = self.props.truck;
+   console.log(truck)
+   self.setState({ truckId: truck.id,
+    truckNo: truck.TruckNumber,
+        vin: truck.VIN,
+        lp: truck.LicensePlate,
+        registeredSt: truck.RegisteredState,
+        make: truck.Make,
+        model: truck.Model,
+        year: truck.Year,
+        registeredDt: moment(new Date(truck.RegisteredDate)).format("YYYY-MM-DD"),
+        renewalDt: moment(new Date(truck.RenewalDate)).format("YYYY-MM-DD"),
+        inspDt: moment(new Date(truck.NinetyDaysInspectionDate)).format("YYYY-MM-DD"),
+        yearlyInspDt: moment(new Date(truck.YearlyInspectionDate)).format("YYYY-MM-DD")
+   })
+   form.setFieldsValue({
+    truckNo: truck.TruckNumber,
+    vin: truck.VIN,
+    lp: truck.LicensePlate,
+    registeredSt: truck.RegisteredState,
+    make: truck.Make,
+    model: truck.Model,
+    year: truck.Year,
+    registeredDt: moment(truck.RegisteredDate),
+    renewalDt: moment(truck.RenewalDate),
+    inspDt: moment(truck.NinetyDaysInspectionDate),
+    yearlyInspDt: moment(truck.YearlyInspectionDate)})
+  }
   addTruck() {
     let obj = {};
     this.props.form.validateFieldsAndScroll((err, values) => {

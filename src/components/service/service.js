@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 import { Col, Row } from 'antd';
-import { DatePicker, Select } from 'antd';
+import { DatePicker, Select, Input } from 'antd';
 import Form from '../../components/uielements/form';
 import basicStyle from '../../settings/basicStyle';
 import { PropTypes } from 'prop-types';
 import Button from '../../components/uielements/button';
 import { rtl } from '../../settings/withDirection';
+import axios from '../../axios';
+import notification from '../../components/notification';
+import moment from 'moment';
+
 
 const FormItem = Form.Item;
 const Option = Select.Option;
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
 class Service extends Component {
   state = {
     value: [],
@@ -25,16 +30,39 @@ class Service extends Component {
         category2: '',
         driver2: '',
         service: '',
-        expDt: '',
-        compDt: ''
+        reqDt: '',
+        compDt: '',
+        notes: '',
+        serviceId: ''
     };
    this.handleChange = this.handleChange.bind(this);
   }
+  addService() {
+    let obj = {};
+    this.props.form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
+    obj.RequestedDate= this.state.reqDt;
+    obj.CompletedDate= this.state.compDt;
+    obj.Notes= this.state.notes;
+  console.log(obj)
 
-  componentDidMount() {
-   
+    axios.post('/api/admin/service',
+    obj,
+    {
+      headers: { 'Content-Type': 'application/json', Authorization: "Bearer " + token }
+    }
+    )
+    .then(function (response) {      
+     console.log(response);
+     notification('success', 'added service successfully!', '');
+    })
+    .catch(function (error) {  
+      notification('error', 'service is not added.please try again', '');  
+      console.error(error);
+    });
   }
- 
+  })
+  }
   handleChange(event) {
     const elemName = event.target.name;
     this.setState({	[elemName]: event.target.value});
@@ -43,6 +71,29 @@ class Service extends Component {
   handleNum(value, name) {
 
     this.setState({	[name]: value});
+  }
+  componentDidUpdate(prevProps, prevState) {
+
+    if(prevProps.service !== this.props.service) {
+      this.getServiceDetails();
+    
+    } 
+  }
+  getServiceDetails() {
+    console.log('yes calling');
+    let self =this;
+    const { form } = self.props;
+   const service = self.props.service;
+   self.setState({ serviceId: service.id,
+    reqDt: moment(new Date(service.RequestedDate)).format("YYYY-MM-DD"),
+    compDt: moment(new Date(service.CompletedDate)).format("YYYY-MM-DD"),
+      notes: service.Notes 
+   })
+   form.setFieldsValue({
+    reqDt: moment(service.RequestedDate),
+    compDt: moment(service.CompletedDate),
+      notes: service.Notes
+  })
   }
   render() {
     const margin = {
@@ -70,7 +121,7 @@ class Service extends Component {
     return (
       <div>          
              <Row style={rowStyle} gutter={gutter} justify="start">
-             <Col md={12} xs={24} style={colStyle}>
+             {/* <Col md={12} xs={24} style={colStyle}>
                    <FormItem {...formItemLayout} label="Customer:  " hasFeedback style={{ marginBottom: 0 }}>
                         {getFieldDecorator('customer', {
                           rules: [
@@ -89,7 +140,7 @@ class Service extends Component {
                           <Option value="2">coupons </Option>                        
                         </Select>)}
                       </FormItem>
-                      </Col>
+                      </Col> */}
              <Col md={12} xs={24} style={colStyle}>
                    <FormItem {...formItemLayout} label="Driver:  " hasFeedback style={{ marginBottom: 0 }}>
                         {getFieldDecorator('driver2', {
@@ -131,13 +182,13 @@ class Service extends Component {
                       </FormItem>
                       </Col>
                       <Col md={12} xs={24} style={colStyle}>
-<FormItem {...formItemLayout} label="Requeted Date:  " hasFeedback style={{ marginBottom: 0 }}>
-                        {getFieldDecorator('expDt', {
+<FormItem {...formItemLayout} label="Requested Date:  " hasFeedback style={{ marginBottom: 0 }}>
+                        {getFieldDecorator('reqDt', {
                           rules: [
           
                             {
                               required: true,
-                              message: 'Please input Expiration Date!',
+                              message: 'Please input Requested Date!',
                             },
                           ],
                           onChange: (e) => this.handleNum(e, 'reqDt')
@@ -159,6 +210,22 @@ class Service extends Component {
                       </FormItem>  
                    
 </Col>
+<Col md={12} xs={24} style={colStyle}>
+                   
+                      <FormItem {...formItemLayout} label="Notes:" hasFeedback style={{ marginBottom: 0 }}>
+                        {getFieldDecorator('notes', {
+                          rules: [
+                            {
+                              message: 'The input is not valid!',
+                            },
+                            {
+                              required: true,
+                              message: 'Please input Notes!',
+                            },
+                          ],
+                        })(<Input name="notes" id="notes" placeholder="Notes" onChange={this.handleChange} />)}
+                      </FormItem>
+                      </Col>
 <Col md={24} xs={24} style={colStyle}>
           <span hidden={this.props.update}>
                    <Button type='primary' htmlType="submit" style={margin}>
@@ -166,7 +233,7 @@ class Service extends Component {
                         </Button>
                         </span>
                         <span hidden={this.props.add}>
-                        <Button type='primary' htmlType="submit" style={margin}>
+                        <Button type='primary' htmlType="submit" style={margin} onClick={() => this.addService()}>
                          SUBMIT
                         </Button>
                         </span>

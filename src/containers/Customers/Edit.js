@@ -124,7 +124,7 @@ class editCustomer extends Component {
           <DocList/>
    
             </TabPane>
-            <TabPane tab="Services" key="5" >
+            <TabPane tab="Requested Services" key="5" >
          
           <ServicesList/>
  

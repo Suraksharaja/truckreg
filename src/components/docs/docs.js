@@ -7,8 +7,11 @@ import { rtl } from '../../settings/withDirection';
 import basicStyle from '../../settings/basicStyle';
 import Popconfirm from '../../components/feedback/popconfirm';
 import { PropTypes } from 'prop-types';
+import axios from '../../axios';
+import notification from '../../components/notification';
 
 const baseUrl = 'http://res.cloudinary.com/'+process.env.REACT_APP_CLOUDINARY_NAME+'/image/upload'
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
 const FormItem = Form.Item;
 const Option = Select.Option;
 class Doc extends Component {
@@ -26,23 +29,72 @@ class Doc extends Component {
     this.setState({ value });
     this.setState({imgError: false });
   }
- 
+  handleSelect(value, name) {
+    this.setState({	[name]: value});
+  }
   constructor(props) {
     super(props);
     this.state = {
        
         category: '',
         cloudUrl: '',
-        desc: ''
+        desc: '',
+        moduleType: ''
 
     };
    this.handleChange = this.handleChange.bind(this);
   }
-
-  componentDidMount() {
-   
+  componentDidUpdate(prevProps, prevState) {
+    console.log('finally got here');
+    console.log(prevProps.doc);
+    if(prevProps.doc !== this.props.doc) {
+      this.getDocDetails();
+    
+    } 
   }
- 
+  getDocDetails() {
+    console.log('yes calling');
+    let self =this;
+    const { form } = self.props;
+   const doc = self.props.doc;
+   self.setState({ docId: doc.id,
+    desc: doc.Description,
+    cloudUrl: doc.Document_URL
+  
+   })
+   form.setFieldsValue({
+    docId: doc.id,
+    desc: doc.Description,
+    cloudUrl: doc.Document_URL
+  })
+  }
+  addDoc() {
+    let obj = {};
+    this.props.form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
+    obj.ReqCategory_Id= this.state.category;
+    obj.Document_URL= this.state.cloudUrl;
+    obj.Description= this.state.desc;
+   
+  console.log(obj)
+
+    axios.post('/api/admin/doc',
+    obj,
+    {
+      headers: { 'Content-Type': 'application/json', Authorization: "Bearer " + token }
+    }
+    )
+    .then(function (response) {      
+     console.log(response);
+     notification('success', 'added document successfully!', '');
+    })
+    .catch(function (error) {  
+      notification('error', 'document is not added.please try again', '');  
+      console.error(error);
+    });
+  }
+  })
+  }
   handleChange(event) {
     const elemName = event.target.name;
     this.setState({	[elemName]: event.target.value});
@@ -102,7 +154,41 @@ class Doc extends Component {
                         </Select>)}
                       </FormItem>
                       </Col>
-                     
+                      <Col md={12} xs={24} style={colStyle}>
+                   <FormItem {...formItemLayout} label="Module Type:  " hasFeedback style={{ marginBottom: 0 }}>
+                        {getFieldDecorator('moduleType', {
+                          rules: [
+                            {
+                              required: false,
+                              message: 'Please input Module Type!',
+                            },
+                          ]
+                          })(<Select
+                          allowClear
+                          showSearch
+                          placeholder="Select Module Type"
+                          onChange= {(e) => this.handleSelect(e, 'moduleType')}   
+                        >
+                          <Option value="1">corousel</Option>
+                          <Option value="2">coupons </Option>                        
+                        </Select>)}
+                      </FormItem>
+                      </Col>
+                      <Col md={12} xs={24} style={colStyle}>
+                      <FormItem {...formItemLayout} label="Description:" hasFeedback style={{ marginBottom: 0 }}>
+                        {getFieldDecorator('desc', {
+                          rules: [
+                            {
+                              message: 'The input is not valid!',
+                            },
+                            {
+                              required: true,
+                              message: 'Please input Description!',
+                            },
+                          ],
+                        })(  <TextArea type="textarea" placeholder="Description" name="desc"  value={this.state.address1} maxLength="100" onChange={this.handleChange}/>)}
+                      </FormItem>
+                      </Col>
                       <Col md={12} xs={24} style={colStyle}>
                    {this.state.cloudUrl? 
                         <div  style={{'text-align': 'center','margin-top': '34px'}}> 
@@ -126,27 +212,14 @@ class Doc extends Component {
                          </div>
                         :
                       <div  style={{'text-align': 'center','margin-top': '34px'}}>
-                          <Button  onClick={this.upload} style={margin}>
+                          <Button  onClick={this.upload} style={margin} >
                           ADD  DOCUMENT
                         </Button>
                         {this.state.imgError?<p style={{color: 'red'}}>Please add an image</p>:''}
                         </div>}
                    </Col>
-                   <Col md={12} xs={24} style={colStyle}>
-                      <FormItem {...formItemLayout} label="Description:" hasFeedback style={{ marginBottom: 0 }}>
-                        {getFieldDecorator('desc', {
-                          rules: [
-                            {
-                              message: 'The input is not valid!',
-                            },
-                            {
-                              required: true,
-                              message: 'Please input Description!',
-                            },
-                          ],
-                        })(  <TextArea type="textarea" placeholder="Description" name="desc"  value={this.state.address1} maxLength="100" onChange={this.handleChange}/>)}
-                      </FormItem>
-                      </Col>
+                  
+
                       <Col md={24} xs={24} style={colStyle}>
           <span hidden={this.props.update}>
                    <Button type='primary' htmlType="submit" style={margin}>
@@ -154,7 +227,7 @@ class Doc extends Component {
                         </Button>
                         </span>
                         <span hidden={this.props.add}>
-                        <Button type='primary' htmlType="submit" style={margin}>
+                        <Button type='primary' htmlType="submit" style={margin} onClick = {() => this.addDoc()}>
                          SUBMIT
                         </Button>
                         </span>

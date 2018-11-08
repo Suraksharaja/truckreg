@@ -23,7 +23,8 @@ class DocList extends Component {
     docForm: true,
     docSave: true,
     docSubmit: true,
-    docTitle: 'DOCS LIST'
+    docTitle: 'DOCS LIST',
+    doc: ''
   };
 
  }
@@ -49,13 +50,14 @@ cancelDoc() {
     docTitle: 'DOCS LIST' 
   });
 }
-editDoc() {
+editDoc(val) {
   this.setState({
     docForm: false,
     docSubmit: true,
     docTable: true,
     docSave: false,
-    docTitle: 'EDIT DOC' 
+    docTitle: 'EDIT DOC',
+    doc: val
   });
 }
  addCat() {
@@ -84,50 +86,19 @@ getDoc() {
     };
     const columns = [
       {
-        title: 'Name',
-        dataIndex: 'FirstName',
+        title: 'Description',
+        dataIndex: 'Description',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Name.localeCompare(b.Name)
       }, 
       {
-        title: 'Phone',
-        dataIndex: 'Phone',
+        title: 'Document_URL',
+        dataIndex: 'Document_URL',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
       },
-      {
-        title: 'DL',
-        dataIndex: 'DL',
-        onFilter: (value, record) => record.Name.indexOf(value) === 0,
-        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
-       
-      },
-      {
-        title: 'IssuedDate',
-        dataIndex: 'IssuedDate',
-        onFilter: (value, record) => record.Name.indexOf(value) === 0,
-        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
-       
-      },{
-        title: 'IssuedState',
-        dataIndex: 'IssuedState',
-        onFilter: (value, record) => record.Name.indexOf(value) === 0,
-        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
-       
-      },{
-        title: 'ExpDate',
-        dataIndex: 'ExpDate',
-        onFilter: (value, record) => record.Name.indexOf(value) === 0,
-        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
-       
-      },{
-        title: 'Medical',
-        dataIndex: 'Medical',
-        onFilter: (value, record) => record.Name.indexOf(value) === 0,
-        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
-       
-      },
+      
       {
         title: 'Active',
         dataIndex: 'isActive',
@@ -144,7 +115,7 @@ getDoc() {
       },
       {
         title: 'Action', 
-        render: (record) => <div className="pointer" onClick={()=>  this.editDoc() }> <Icon type="edit" className="isoEditIcon"/></div>
+        render: (record) => <div style={{cursor:'pointer'}} onClick={()=>  this.editDoc(record) }> <Icon type="edit" className="isoEditIcon"/></div>
       }
     ];
     return (
@@ -166,7 +137,7 @@ getDoc() {
         </div>
         <div  hidden={this.state.docForm}>
         <span>
-        <Doc  add ={this.state.docSubmit} update={this.state.docSave}/>
+        <Doc  add ={this.state.docSubmit} update={this.state.docSave} doc={this.state.doc}/>
        
                         <Button type='primary' htmlType="submit" style={margin} onClick={()=>{ this.cancelDoc() }}>
                           CANCEL
