@@ -11,7 +11,8 @@ import axios from '../../axios';
 import notification from '../../components/notification';
 
 const baseUrl = 'http://res.cloudinary.com/'+process.env.REACT_APP_CLOUDINARY_NAME+'/image/upload'
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+let token = '';
 const FormItem = Form.Item;
 const Option = Select.Option;
 class Doc extends Component {
@@ -24,6 +25,7 @@ class Doc extends Component {
     docSave: true,
     docSubmit: true,
     docTitle: 'DOCS LIST'
+    
   };
   onChange = (value) => {
     this.setState({ value });
@@ -31,6 +33,12 @@ class Doc extends Component {
   }
   handleSelect(value, name) {
     this.setState({	[name]: value});
+    console.log(value);
+    if(value === 'truck') {
+      console.log('should not come here');
+      this.getTruck();
+    }
+    console.log(name);
   }
   constructor(props) {
     super(props);
@@ -39,11 +47,37 @@ class Doc extends Component {
         category: '',
         cloudUrl: '',
         desc: '',
-        moduleType: ''
+        moduleType: '',
+        categoryValue: []
 
     };
    this.handleChange = this.handleChange.bind(this);
+   this.upload = this.upload.bind(this);
+   this.removeImage = this.removeImage.bind(this);
   }
+  getTruck() {
+    let self =this;
+    axios.get('/api/admin/truck',
+    {headers: { 'Content-Type': 'application/json', Authorization: "Bearer " + token }})
+    .then(function (response) {
+      console.log(response);
+       self.setState({categoryValue: response.data });
+    })
+    .catch(function (error) {
+      console.error(error);
+    });
+   }
+   getDriver() {
+    let self =this;
+    axios.get('/api/admin/driver',
+    {headers: { 'Content-Type': 'application/json', Authorization: "Bearer " + token }})
+    .then(function (response) {
+       self.setState({categoryValue: response.data });
+    })
+    .catch(function (error) {
+      console.error(error);
+    });
+   }
   componentDidUpdate(prevProps, prevState) {
     console.log('finally got here');
     console.log(prevProps.doc);
@@ -51,6 +85,18 @@ class Doc extends Component {
       this.getDocDetails();
     
     } 
+  }
+  componentDidMount() {
+    if (localStorage.getItem('userDetails')) {
+      const Existing = localStorage.getItem('userDetails');
+      if (Existing != null) {
+        const parseExisting = JSON.parse(Existing);
+        if (parseExisting) {
+            token = parseExisting.userData.Token;
+        }
+      }
+  
+	  }
   }
   getDocDetails() {
     console.log('yes calling');
@@ -68,6 +114,17 @@ class Doc extends Component {
     cloudUrl: doc.Document_URL
   })
   }
+  upload() {
+    let self = this;
+    window.cloudinary.openUploadWidget({ cloud_name:process.env.REACT_APP_CLOUDINARY_NAME, upload_preset: process.env.REACT_APP_CLOUDINARY_PRESET,folder: 'testTruck'},
+    (error, result) => {
+      if(result) {
+        console.log(result);
+        console.log(result[0].path.replace("pdf", "png"));
+        self.setState({cloudUrl: result[0].path.replace("pdf", "png")});
+      }
+    })
+  }
   addDoc() {
     let obj = {};
     this.props.form.validateFieldsAndScroll((err, values) => {
@@ -78,7 +135,7 @@ class Doc extends Component {
    
   console.log(obj)
 
-    axios.post('/api/admin/doc',
+    axios.post('/api/admin/documnet',
     obj,
     {
       headers: { 'Content-Type': 'application/json', Authorization: "Bearer " + token }
@@ -94,6 +151,38 @@ class Doc extends Component {
     });
   }
   })
+  }
+  updateDoc() {
+    let obj = {};
+    this.props.form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
+    obj.ReqCategory_Id= this.state.category;
+    obj.Document_URL= this.state.cloudUrl;
+    obj.Description= this.state.desc;
+   
+  console.log(obj)
+
+    axios.put('/api/admin/document/'+this.state.docId,
+    obj,
+    {
+      headers: { 'Content-Type': 'application/json', Authorization: "Bearer " + token }
+    }
+    )
+    .then(function (response) {      
+     console.log(response);
+     notification('success', 'updated document successfully!', '');
+    })
+    .catch(function (error) {  
+      notification('error', 'document is not updated.please try again', '');  
+      console.error(error);
+    });
+  }
+  })
+  }
+  removeImage () {
+    let self =this;
+    self.setState({cloudUrl: ''})
+  
   }
   handleChange(event) {
     const elemName = event.target.name;
@@ -135,26 +224,6 @@ class Doc extends Component {
 
              <Row style={rowStyle} gutter={gutter} justify="start">
              <Col md={12} xs={24} style={colStyle}>
-                   <FormItem {...formItemLayout} label="Category:  " hasFeedback style={{ marginBottom: 0 }}>
-                        {getFieldDecorator('category', {
-                          rules: [
-                            {
-                              required: false,
-                              message: 'Please input Category!',
-                            },
-                          ]
-                          })(<Select
-                          allowClear
-                          showSearch
-                          placeholder="Select Category"
-                          onChange= {(e) => this.handleSelect(e, 'category')}   
-                        >
-                          <Option value="1">corousel</Option>
-                          <Option value="2">coupons </Option>                        
-                        </Select>)}
-                      </FormItem>
-                      </Col>
-                      <Col md={12} xs={24} style={colStyle}>
                    <FormItem {...formItemLayout} label="Module Type:  " hasFeedback style={{ marginBottom: 0 }}>
                         {getFieldDecorator('moduleType', {
                           rules: [
@@ -169,13 +238,34 @@ class Doc extends Component {
                           placeholder="Select Module Type"
                           onChange= {(e) => this.handleSelect(e, 'moduleType')}   
                         >
-                          <Option value="1">corousel</Option>
-                          <Option value="2">coupons </Option>                        
+                          <Option value="company">company</Option>
+                          <Option value="truck">truck</Option> 
+                          <Option value="driver">driver</Option>                         
                         </Select>)}
                       </FormItem>
                       </Col>
+             <Col md={12} xs={24} style={colStyle}>
+                   <FormItem {...formItemLayout} label="Category:  " hasFeedback style={{ marginBottom: 0 }}>
+                        {getFieldDecorator('category', {
+                          rules: [
+                            {
+                              required: false,
+                              message: 'Please input Category!',
+                            },
+                          ]
+                          })(<Select
+                          allowClear
+                          showSearch
+                          placeholder="Select Category"
+                          onChange= {(e) => this.handleSelect(e, 'category')}   
+                        >
+                     {this.state.categoryValue.length > 0?this.state.categoryValue.map(d => <Option key={d.id}>{d.TruckNumber}</Option>): ''}                      
+                        </Select>)}
+                      </FormItem>
+                      </Col>
+                     
                       <Col md={12} xs={24} style={colStyle}>
-                      <FormItem {...formItemLayout} label="Description:" hasFeedback style={{ marginBottom: 0 }}>
+                      <FormItem {...formItemLayout} label="Name:" hasFeedback style={{ marginBottom: 0 }}>
                         {getFieldDecorator('desc', {
                           rules: [
                             {
@@ -189,7 +279,7 @@ class Doc extends Component {
                         })(  <TextArea type="textarea" placeholder="Description" name="desc"  value={this.state.address1} maxLength="100" onChange={this.handleChange}/>)}
                       </FormItem>
                       </Col>
-                      <Col md={12} xs={24} style={colStyle}>
+                      <Col style={colStyle}>
                    {this.state.cloudUrl? 
                         <div  style={{'text-align': 'center','margin-top': '34px'}}> 
                          <Popconfirm
@@ -204,7 +294,7 @@ class Doc extends Component {
                          <div className="isoContactCardHead">
                            <div className="isoPersonImage">
                              <div style={{display: 'flex' }}>
-                             <img height="160" width="160" className="prodimg" alt="" src={`${baseUrl}/${this.state.cloudUrl}`}/>
+                             <img height="250" width="250" className="prodimg" alt="" src={`${baseUrl}/${this.state.cloudUrl}`}/>
                             
                              </div>
                            </div>
@@ -222,7 +312,7 @@ class Doc extends Component {
 
                       <Col md={24} xs={24} style={colStyle}>
           <span hidden={this.props.update}>
-                   <Button type='primary' htmlType="submit" style={margin}>
+                   <Button type='primary' htmlType="submit" onClick = {() => this.updateDoc()} style={margin}>
                           SAVE DOC
                         </Button>
                         </span>

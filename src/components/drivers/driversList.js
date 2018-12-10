@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { Icon } from 'antd';
 import { Table } from 'antd';
 import Form from '../../components/uielements/form';
@@ -7,14 +6,13 @@ import { PropTypes } from 'prop-types';
 import Button from '../../components/uielements/button'; 
 import Driver from './drivers';
 import { Card } from 'antd';
-import { Col, Row } from 'antd';
 import { rtl } from '../../settings/withDirection';
-import basicStyle from '../../settings/basicStyle';
 import axios from '../../axios';
 import moment from 'moment';
 
 let lat =0;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+let token = '';
 class DriversList extends Component {
 
   constructor(props) {
@@ -69,8 +67,19 @@ editDriver(val) {
   console.log('u r getting');
   console.log(val);
 }
+
 componentDidMount() {
-  this.getDriver();
+  if (localStorage.getItem('userDetails')) {
+    const Existing = localStorage.getItem('userDetails');
+    if (Existing != null) {
+      const parseExisting = JSON.parse(Existing);
+      if (parseExisting) {
+          token = parseExisting.userData.Token;
+          this.getDriver();
+      }
+    }
+
+  }
 }
 getDriver() {
  let self =this;
@@ -85,7 +94,6 @@ getDriver() {
 }
 
   render() {
-    const { rowStyle, colStyle, gutter } = basicStyle;
    
     const margin = {
       margin: rtl === 'rtl' ? '0 0 8px 8px' : '0 8px 8px 0',

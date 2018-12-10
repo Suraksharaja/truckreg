@@ -17,6 +17,7 @@ import YoutubeSearch from './youtubeSearch/reducers';
 import DevReducers from '../customApp/redux/reducers';
 import Articles from './articles/reducers';
 import Investors from './investors/reducers';
+import Login from './login/reducer';
 
 export default {
   Auth,
@@ -37,5 +38,6 @@ export default {
   YoutubeSearch,
   Articles,
   Investors,
+  Login,
   ...DevReducers,
 };

@@ -8,10 +8,11 @@ import { Card, Col, Row  } from 'antd';
 import Button from '../../components/uielements/button';
 import { rtl } from '../../settings/withDirection';
 import './users.css';
-
+import axios from '../../axios';
 
 let lat =0;
-
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+let token = '';
 export default class extends Component {
 
   constructor(props) {
@@ -33,10 +34,45 @@ return lat;
  addCat() {
   this.props.history.push('/admin/category/add');
  }
-  componentDidMount() {
-  
-  }
 
+  componentDidMount() {
+    let self = this;
+    if (localStorage.getItem('userDetails')) {
+      console.log(1);
+      const Existing = localStorage.getItem('userDetails');
+      console.log(2);
+      if (Existing != null) {
+        console.log(3);
+        const parseExisting = JSON.parse(Existing);
+        if (parseExisting) {
+          console.log(4);
+           // token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk';//
+            token= parseExisting.userData.Token;
+          // token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic3VyZXNoLmVkZGFsYSsyQHlhaG9vLmNvbSIsInVzZXJJZCI6MjcsImRhdGUiOiIyMDE4LTEwLTE2VDA5OjM5OjIxLjg3OVoifSwiaWF0IjoxNTM5NjgyNzYxLCJleHAiOjE1NDQ4NjY3NjF9.5foRFL0EWHwsXBjqS2wyXUsUGy064mdfPStNnMirC5g';
+            console.log(parseExisting.userData.Token);
+              self.getUsers();
+            
+        }
+      }
+  
+	  }
+  }
+  getUsers() {
+    let self =this;
+    console.log(token);
+    axios.get('/api/admin/users',
+    {headers: { 'Content-Type': 'application/json', Authorization: "Bearer " + token }})
+    .then(function (response) {
+      console.log('here');
+      console.log(response)
+      // let manufList = _.where(response.data, {Active: true});
+       self.setState({value: response.data });
+    })
+    .catch(function (error) {
+      console.error(error);
+    });
+  }
+  
   render() {
     const { rowStyle, colStyle, gutter } = basicStyle;
     const margin = {    float: 'right',
@@ -45,7 +81,7 @@ return lat;
     const columns = [
       {
         title: 'Name',
-        dataIndex: 'Name',
+        dataIndex: 'FirstName',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Name.localeCompare(b.Name)
       }, 
@@ -65,28 +101,14 @@ return lat;
       },
       {
         title: 'Role',
-        dataIndex: 'Role',
+        dataIndex: 'Role_Id',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
       },
       {
-        title: 'Active',
-        dataIndex: 'isActive',
-        filters: [{
-          text: 'active',
-          value: 1,
-        }, {
-          text: 'inactive',
-          value: 0,
-        }], 
-        filterMultiple: false,
-        onFilter: (value, record) => record.isActive === JSON.parse(value),
-        render: (record) => <div> {record === 1 ? 'Yes' : 'No'}</div>
-      },
-      {
         title: 'Action', 
-       render: (record) => <Link to={`/admin/category/edit/${record.id}/${record.ParentId}`}> <Icon type="edit" className="isoEditIcon"/></Link>
+       render: (record) => <Link to={{pathname:`/admin/users/edit`, state: { userinfo: record}}}> <Icon type="edit" className="isoEditIcon"/></Link>
       }
     ];
     return (

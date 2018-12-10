@@ -11,7 +11,8 @@ import { PropTypes } from 'prop-types';
 import moment from 'moment';
 
 const FormItem = Form.Item;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+let token = '';
 class Truck extends Component {
   state = {
     value: [],
@@ -46,6 +47,17 @@ class Truck extends Component {
       this.getTruckDetails();
     
     } 
+  }
+  componentDidMount() {
+    if (localStorage.getItem('userDetails')) {
+      const Existing = localStorage.getItem('userDetails');
+      if (Existing != null) {
+        const parseExisting = JSON.parse(Existing);
+        if (parseExisting) {
+            token = parseExisting.userData.Token;
+        }
+      }
+    }
   }
   getTruckDetails() {
     console.log('yes calling');

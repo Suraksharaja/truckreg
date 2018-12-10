@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { Icon, Card } from 'antd';
 import { Table } from 'antd';
 import Form from '../../components/uielements/form';
@@ -11,7 +10,8 @@ import axios from '../../axios';
 import moment from 'moment';
 
 let lat =0;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+let token = '';
 class ServicesList extends Component {
 
   constructor(props) {
@@ -34,8 +34,19 @@ class ServicesList extends Component {
 lat++;
 return lat;
  }
- componentDidMount() {
-  this.getService();
+
+componentDidMount() {
+  if (localStorage.getItem('userDetails')) {
+    const Existing = localStorage.getItem('userDetails');
+    if (Existing != null) {
+      const parseExisting = JSON.parse(Existing);
+      if (parseExisting) {
+          token = parseExisting.userData.Token;
+          this.getService();
+      }
+    }
+
+  }
 }
  getService() {
   let self =this;
@@ -89,6 +100,13 @@ editService(val) {
     };
     const columns = [
       {
+        title: 'Name',
+        dataIndex: 'Notes',
+        onFilter: (value, record) => record.Name.indexOf(value) === 0,
+        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
+       
+      },
+      {
         title: 'Completed Date',
         dataIndex: 'CompletedDate',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
@@ -103,27 +121,6 @@ editService(val) {
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : '',
         render: (record) => <div> {moment(record).format("DD/MM/YYYY")}</div>
        
-      },
-      {
-        title: 'Notes',
-        dataIndex: 'Notes',
-        onFilter: (value, record) => record.Name.indexOf(value) === 0,
-        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
-       
-      },
-      {
-        title: 'Active',
-        dataIndex: 'isActive',
-        filters: [{
-          text: 'active',
-          value: 1,
-        }, {
-          text: 'inactive',
-          value: 0,
-        }], 
-        filterMultiple: false,
-        onFilter: (value, record) => record.isActive === JSON.parse(value),
-        render: (record) => <div> {record === 1 ? 'Yes' : 'No'}</div>
       },
       {
         title: 'Action', 

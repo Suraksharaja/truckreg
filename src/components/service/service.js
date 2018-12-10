@@ -13,7 +13,9 @@ import moment from 'moment';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+let token = '';;
+
 class Service extends Component {
   state = {
     value: [],
@@ -78,6 +80,18 @@ class Service extends Component {
       this.getServiceDetails();
     
     } 
+  }
+  componentDidMount() {
+    if (localStorage.getItem('userDetails')) {
+      const Existing = localStorage.getItem('userDetails');
+      if (Existing != null) {
+        const parseExisting = JSON.parse(Existing);
+        if (parseExisting) {
+            token = parseExisting.userData.Token;
+        }
+      }
+  
+    }
   }
   getServiceDetails() {
     console.log('yes calling');
@@ -156,8 +170,8 @@ class Service extends Component {
                           placeholder="Select Driver"
                           onChange= {(e) => this.handleSelect(e, 'driver2')}   
                         >
-                          <Option value="1">corousel</Option>
-                          <Option value="2">coupons </Option>                        
+                          <Option value="1">Ragav</Option>
+                          <Option value="2">Surendar </Option>                        
                         </Select>)}
                       </FormItem>
                       </Col>
@@ -176,8 +190,8 @@ class Service extends Component {
                           placeholder="Select Service"
                           onChange= {(e) => this.handleSelect(e, 'service')}   
                         >
-                          <Option value="1">corousel</Option>
-                          <Option value="2">coupons </Option>                        
+                          <Option value="1">RIP</Option>
+                          <Option value="2"> DL Renewal</Option>                        
                         </Select>)}
                       </FormItem>
                       </Col>

@@ -9,10 +9,14 @@ import basicStyle from '../../settings/basicStyle';
 import Popconfirm from '../../components/feedback/popconfirm';
 import { Card } from 'antd';
 import './users.css';
+import axios from '../../axios';
+import notification from '../../components/notification';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
 const baseUrl = 'http://res.cloudinary.com/'+process.env.REACT_APP_CLOUDINARY_NAME+'/image/upload'
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+let token = '';
 class editUser extends Component {
   state = {
     value: [],
@@ -33,20 +37,88 @@ class editUser extends Component {
       driver: '',
       cloudUrl: '',
       active: true,
-      checked: true
+      checked: true,
+      userId: ''
     };
    this.handleChange = this.handleChange.bind(this);
   }
 
-  componentDidMount() {
-   
-  }
  
+  componentDidMount() {
+    let self = this;
+    if (localStorage.getItem('userDetails')) {
+      const Existing = localStorage.getItem('userDetails');
+      if (Existing != null) {
+        const parseExisting = JSON.parse(Existing);
+        if (parseExisting) {
+            token = parseExisting.userData.token;
+            if(self.props.location.state) {
+              self.getUserDetails();
+            }
+        }
+      }
+  
+	  }
+  }
+  getUserDetails() {
+    console.log('yes calling');
+    let self =this;
+    const { form } = self.props;
+   const userinfo = self.props.location.state.userinfo;
+   console.log(userinfo)
+   self.setState({ userId: userinfo.id,
+    fName: userinfo.FirstName,
+    lName: userinfo.LastName,
+    phone: userinfo.Phone,
+    email: userinfo.Email,
+    uName: userinfo.UserName
+   })
+   form.setFieldsValue({
+    fName: userinfo.FirstName,
+    lName: userinfo.LastName,
+    phone: userinfo.Phone,
+    email: userinfo.Email,
+    uName: userinfo.UserName})
+  }
+  updateUser(e) {
+    let self = this;
+    let obj = {};
+    self.props.form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
+        obj.FirstName= this.state.fName;
+        obj.LastName= this.state.lName;
+        obj.Email= this.state.email;
+        obj.Phone= this.state.phone;
+        obj.Password= this.state.pwd;
+        obj.UserName= this.state.uName;
+
+    axios.put('/api/admin/users/'+this.state.userId,
+    obj,
+    {
+      headers: { 'Content-Type': 'application/json', Authorization: "Bearer " + token }
+    }
+    )
+    .then(function (response) {      
+     console.log(response);
+    
+    notification('success', 'updated users successfully!', '');
+     //self.props.history.push('/admin/customers/list');
+     
+    })
+    .catch(function (error) {  
+      notification('error', 'users is not updated.please try again', '');  
+      console.error(error);
+    });
+  }
+  })
+  }
   handleChange(event) {
     const elemName = event.target.name;
     this.setState({	[elemName]: event.target.value});
   }
-  
+  handleSelect(value, name) {
+    this.setState({	[name]: value});
+  }
   render() {
 
     const { rowStyle, colStyle, gutter } = basicStyle;
@@ -298,7 +370,7 @@ class editUser extends Component {
                     </FormItem>
                    </Col>
                    <Col md={12} xs={24} style={colStyle}>
-                   <Button type='primary' htmlType="submit" style={margin}>
+                   <Button type='primary' htmlType="submit" onClick={()=>this.updateUser()} style={margin}>
                         SAVE
                         </Button>
                    </Col>

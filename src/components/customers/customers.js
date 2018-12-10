@@ -14,8 +14,9 @@ import notification from '../../components/notification';
 import { Link } from 'react-router-dom';
 
 const FormItem = Form.Item;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
- class Customer extends Component {
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+ let token = ''; 
+class Customer extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -62,12 +63,28 @@ const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoi
     this.addCustomer = this.addCustomer.bind(this);
     this.updateCustomer = this.updateCustomer.bind(this);
   }
+  // componentDidMount() {
+  //   console.log('finally got here');
+  //   console.log(this.props.info);
+  //   if(this.props.info) {
+  //     this.getInfo();
+  //   }
+  // }
   componentDidMount() {
-    console.log('finally got here');
-    console.log(this.props.info);
-    if(this.props.info) {
-      this.getInfo();
-    }
+    let self = this;
+    if (localStorage.getItem('userDetails')) {
+      const Existing = localStorage.getItem('userDetails');
+      if (Existing != null) {
+        const parseExisting = JSON.parse(Existing);
+        if (parseExisting) {
+            token = parseExisting.userData.Token
+              if(self.props.info) {
+                self.getInfo();
+              }
+        }
+      }
+  
+	  }
   }
   getInfo() {
     let self =this;

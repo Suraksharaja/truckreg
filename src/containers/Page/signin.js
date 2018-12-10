@@ -4,18 +4,24 @@ import { connect } from "react-redux";
 import Input from "../../components/uielements/input";
 import Checkbox from "../../components/uielements/checkbox";
 import Button from "../../components/uielements/button";
-import authAction from "../../redux/auth/actions";
-import appAction from "../../redux/app/actions";
-import IntlMessages from "../../components/utility/intlMessages";
 import SignInStyleWrapper from "./signin.style";
+import actions from '../../redux/login/action';
+import Form from '../../components/uielements/form';
 
-const { login } = authAction;
-const { clearMenu } = appAction;
+const {
+  login
+} = actions;
 
 class SignIn extends Component {
   state = {
     redirectToReferrer: false
   };
+  constructor(props) {
+    super(props);
+    this.state = {username: '', password: '', formValid: { errMsg: '', user: true, pwd: true }};
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
   componentWillReceiveProps(nextProps) {
     if (
       this.props.isLoggedIn !== nextProps.isLoggedIn &&
@@ -24,13 +30,42 @@ class SignIn extends Component {
       this.setState({ redirectToReferrer: true });
     }
   }
+  handleChange(event) {
+    const elemName = event.target.name;
+    this.setState({	[elemName]: event.target.value});
+  }
   handleLogin = () => {
     const { login, clearMenu } = this.props;
     login();
     clearMenu();
     this.props.history.push("/admin");
   };
+  handleSubmit(event) {
+    event.preventDefault();
+    let self = this;
+    self.setState({ formValid: { username: '', user: true, pwd: true } });
+    if (this.state.username.length !== 0 && this.state.password.length !== 0) {
+			if (this.state.username.includes('@') || this.state.username.length === 10) {
+				try {
+          this.props.login({ username: this.state.username, password: this.state.password, Login: true });
+          
+				} catch (e) {
+					this.setState({ formValid: { errMsg: 'Invalid userId or Password', pwd: false, user: true } });
+				}
+
+			} else {
+				this.setState({ formValid: { errMsg: 'Enter valid username', user: false, pwd: true } });
+			}
+		} else {
+			this.setState({ formValid: { errMsg: 'Enter user name and password', pwd: false, user: true } });
+
+		}
+  }
   render() {
+    const {
+      loginError,
+      viewError
+    } = this.props;
     const from = { pathname: "/admin" };
     const { redirectToReferrer } = this.state;
 
@@ -43,34 +78,33 @@ class SignIn extends Component {
           <div className="isoLoginContent">
             <div className="isoLogoWrapper">
               <Link to="/dashboard">
-                <IntlMessages id="page.signInTitle" />
+                <img src="/14418836.jpg" alt=""/>
               </Link>
             </div>
-
-            <div className="isoSignInForm">
-              <div className="isoInputWrapper">
-                <Input size="large" placeholder="Username" />
-              </div>
-
-              <div className="isoInputWrapper">
-                <Input size="large" type="password" placeholder="Password" />
-              </div>
-
-              <div className="isoInputWrapper isoLeftRightComponent">
-                <Checkbox>
-                  <IntlMessages id="page.signInRememberMe" />
-                </Checkbox>
-                <Button type="primary" onClick={this.handleLogin}>
-                  <IntlMessages id="page.signInButton" />
-                </Button>
-              </div>
-
-              <div className="isoCenterComponent isoHelperWrapper">
-                <Link to="/forgotpassword" className="isoForgotPass">
-                  <IntlMessages id="page.signInForgotPass" />
-                </Link>
-              </div>
-            </div>
+            <Form onSubmit={this.handleSubmit}>
+                <div className="isoInputWrapper">
+                  <Input size="large" placeholder="Username" name="username" onChange={this.handleChange} required/>
+                </div>
+                <br/>
+                <div className="error" hidden={this.state.formValid.user}>{this.state.formValid.errMsg}</div>
+                <div className="isoInputWrapper">
+                  <Input size="large" type="password" placeholder="Password" name="password" onChange={this.handleChange} required/>
+                </div>
+               
+                <div className="error" hidden={viewError}> {loginError}</div>
+                <div className="error" hidden={this.state.formValid.pwd}>{this.state.formValid.errMsg}</div>
+                <div className="isoInputWrapper isoLeftRightComponent">
+                  <Checkbox>
+                    RememberMe
+                  </Checkbox>
+                  <br/><br/> <br/>
+                  <Button type="primary" htmlType="submit">
+                      Sign  In             
+                  </Button>
+                </div>
+              </Form>
+           
+           
           </div>
         </div>
       </SignInStyleWrapper>
@@ -78,9 +112,13 @@ class SignIn extends Component {
   }
 }
 
-export default connect(
-  state => ({
-    isLoggedIn: state.Auth.idToken !== null ? true : false
-  }),
-  { login, clearMenu }
-)(SignIn);
+function mapStateToProps(state) {
+  return {
+    ...state.Login.toJS()
+    
+  };
+}
+export default connect(mapStateToProps, {
+  login
+})(SignIn);
+

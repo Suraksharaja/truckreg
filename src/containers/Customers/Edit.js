@@ -1,20 +1,15 @@
 import React, { Component } from 'react';
 import { Col, Row } from 'antd';
 import LayoutContentWrapper from "../../components/utility/layoutWrapper.js";
-import Button from '../../components/uielements/button';
 import Form from '../../components/uielements/form';
-import { rtl } from '../../settings/withDirection';
 import basicStyle from '../../settings/basicStyle';
 import { Card } from 'antd';
 import Tabs, { TabPane } from '../../components/uielements/tabs';
 import './customers.css';
 import Customer from '../../components/customers/customers';
-import Truck from '../../components/trucks/trucks';
-import Doc from '../../components/docs/docs';
 import DocList from '../../components/docs/docsList';
 import DriversList from '../../components/drivers/driversList';
 import TruckList from '../../components/trucks/trucksList';
-import Service from '../../components/service/service';
 import ServicesList from '../../components/service/servicesList';
 
 function callback(key) {}
@@ -44,6 +39,7 @@ class editCustomer extends Component {
     self.setState({activeTab:  a})
   }
 
+  
   // componentDidUpdate() {
   //   console.log('yesss');
   //   if(this.props.location.state) {
@@ -84,11 +80,6 @@ class editCustomer extends Component {
   render() {
 
     const { rowStyle, colStyle, gutter } = basicStyle;
-   
-    const margin = {
-      margin: rtl === 'rtl' ? '0 0 8px 8px' : '0 8px 8px 0',
-      marginTop: '5px'
-    };
    
     return (
       <LayoutContentWrapper >

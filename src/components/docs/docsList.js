@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { Icon } from 'antd';
 import { Table, Card } from 'antd';
 import Form from '../../components/uielements/form';
@@ -9,7 +8,9 @@ import Doc from './docs';
 import Button from '../../components/uielements/button'; 
 import axios from '../../axios';
 let lat =0;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+const baseUrl = 'http://res.cloudinary.com/'+process.env.REACT_APP_CLOUDINARY_NAME+'/image/upload';
+let token = '';
 class DocList extends Component {
 
   constructor(props) {
@@ -63,8 +64,20 @@ editDoc(val) {
  addCat() {
   this.props.history.push('/admin/category/add');
  }
- componentDidMount() {
-  this.getDoc();
+
+componentDidMount() {
+  let self = this;
+  if (localStorage.getItem('userDetails')) {
+    const Existing = localStorage.getItem('userDetails');
+    if (Existing != null) {
+      const parseExisting = JSON.parse(Existing);
+      if (parseExisting) {
+          token = parseExisting.userData.Token;
+          self.getDoc();
+      }
+    }
+
+  }
 }
 getDoc() {
  let self =this;
@@ -86,33 +99,21 @@ getDoc() {
     };
     const columns = [
       {
-        title: 'Description',
+        title: 'Name',
         dataIndex: 'Description',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
         sorter: (a, b) => a.Name.localeCompare(b.Name)
       }, 
       {
-        title: 'Document_URL',
+        title: 'Document',
         dataIndex: 'Document_URL',
         onFilter: (value, record) => record.Name.indexOf(value) === 0,
-        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
+        sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : '',
+        render: (record) =>    <div className="isoContactCardHead">
+        <img height="160" width="160" className="prodimg" alt="" src={`${baseUrl}/${record ? record.replace("pdf", "png"): ''}`}/>
+    </div>
        
-      },
-      
-      {
-        title: 'Active',
-        dataIndex: 'isActive',
-        filters: [{
-          text: 'active',
-          value: 1,
-        }, {
-          text: 'inactive',
-          value: 0,
-        }], 
-        filterMultiple: false,
-        onFilter: (value, record) => record.isActive === JSON.parse(value),
-        render: (record) => <div> {record === 1 ? 'Yes' : 'No'}</div>
-      },
+      },     
       {
         title: 'Action', 
         render: (record) => <div style={{cursor:'pointer'}} onClick={()=>  this.editDoc(record) }> <Icon type="edit" className="isoEditIcon"/></div>

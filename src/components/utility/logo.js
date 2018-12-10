@@ -15,7 +15,7 @@ export default ({ collapsed }) => {
         </div>
       ) : (
         <h3>
-          <Link to="/dashboard">Customer Truck </Link>
+          <img width="105%" src="/platinum7.png" alt=""/>
         </h3>
       )}
     </div>

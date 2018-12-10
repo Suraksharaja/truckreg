@@ -10,10 +10,14 @@ import Popconfirm from '../../components/feedback/popconfirm';
 import { Card } from 'antd';
 import './users.css';
 import { Link } from "react-router-dom";
+import axios from '../../axios';
+import notification from '../../components/notification';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
 const baseUrl = 'http://res.cloudinary.com/'+process.env.REACT_APP_CLOUDINARY_NAME+'/image/upload'
+let token = '';
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
 class addUser extends Component {
   state = {
     value: [],
@@ -40,14 +44,52 @@ class addUser extends Component {
   }
 
   componentDidMount() {
-   
+    if (localStorage.getItem('userDetails')) {
+      const Existing = localStorage.getItem('userDetails');
+      if (Existing != null) {
+        const parseExisting = JSON.parse(Existing);
+        if (parseExisting) {
+            token = parseExisting.userData.token;
+        }
+      }
+    }
   }
- 
+  handleSelect(value, name) {
+    this.setState({	[name]: value});
+  }
   handleChange(event) {
     const elemName = event.target.name;
     this.setState({	[elemName]: event.target.value});
   }
-  
+  addUsers() {
+    let obj = {};
+    this.props.form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
+    obj.FirstName= this.state.fName;
+    obj.LastName= this.state.lName;
+    obj.Email= this.state.email;
+    obj.Phone= this.state.phone;
+    obj.Password= this.state.pwd;
+    obj.UserName= this.state.uName;
+  console.log(obj)
+
+    axios.post('/api/admin/users',
+    obj,
+    {
+      headers: { 'Content-Type': 'application/json', Authorization: "Bearer " + token }
+    }
+    )
+    .then(function (response) {      
+     console.log(response);
+     notification('success', 'added user successfully!', '');
+    })
+    .catch(function (error) {  
+      notification('error', 'user is not added.please try again', '');  
+      console.error(error);
+    });
+  }
+  })
+  }
   render() {
 
     const { rowStyle, colStyle, gutter } = basicStyle;
@@ -299,7 +341,7 @@ class addUser extends Component {
                     </FormItem>
                    </Col>
                    <Col md={12} xs={24} style={colStyle}>
-                   <Button type='primary' htmlType="submit" style={margin}>
+                   <Button type='primary' htmlType="submit" onClick={()=>this.addUsers()} style={margin}>
                         SUBMIT
                         </Button>
                         <Button type="primary"   style={margin} >

@@ -10,7 +10,8 @@ import { rtl } from '../../settings/withDirection';
 import './customers.css';
 import axios from '../../axios';
 let lat =0;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+let token = '';
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
 export default class extends Component {
 
   constructor(props) {
@@ -32,9 +33,20 @@ return lat;
  addCat() {
   this.props.history.push('/admin/customers/addInfo');
  }
+
  componentDidMount() {
-   this.getCustomer();
- }
+  let self = this;
+  if (localStorage.getItem('userDetails')) {
+    const Existing = localStorage.getItem('userDetails');
+    if (Existing != null) {
+      const parseExisting = JSON.parse(Existing);
+      if (parseExisting) {
+          token = parseExisting.userData.Token;
+          self.getCustomer();
+      }
+    }
+  }
+}
  getCustomer() {
   let self =this;
   axios.get('/api/admin/customer',
@@ -83,20 +95,20 @@ return lat;
         sorter: (a, b) => a.Description && b.Description? a.Description.localeCompare(b.Description) : ''
        
       },
-      {
-        title: 'Active',
-        dataIndex: 'isActive',
-        filters: [{
-          text: 'active',
-          value: 1,
-        }, {
-          text: 'inactive',
-          value: 0,
-        }], 
-        filterMultiple: false,
-        onFilter: (value, record) => record.isActive === JSON.parse(value),
-        render: (record) => <div> {record === 1 ? 'Yes' : 'No'}</div>
-      },
+      // {
+      //   title: 'Active',
+      //   dataIndex: 'isActive',
+      //   filters: [{
+      //     text: 'active',
+      //     value: 1,
+      //   }, {
+      //     text: 'inactive',
+      //     value: 0,
+      //   }], 
+      //   filterMultiple: false,
+      //   onFilter: (value, record) => record.isActive === JSON.parse(value),
+      //   render: (record) => <div> {record === 1 ? 'Yes' : 'No'}</div>
+      // },
       {
         title: 'Action', 
         render: (record) => <Link  to={{pathname:`/admin/customers/edit/1`, state: { info: record}}}> <Icon type="edit" className="isoEditIcon"/></Link>

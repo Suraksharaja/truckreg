@@ -23,7 +23,7 @@ const options = [
     children: [
       {
         key: "customers/addInfo",
-        label: "Add Info"
+        label: "Add"
       },
     //  {
     //     key: "customers/addTruck",

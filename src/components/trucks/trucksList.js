@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { Icon } from 'antd';
 import { Table, Card } from 'antd';
 import Form from '../../components/uielements/form';
@@ -9,7 +8,8 @@ import Truck from './trucks';
 import Button from '../../components/uielements/button'; 
 import axios from '../../axios';
 let lat =0;
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoic2FpQGdtYWlsLmNvbSIsInVzZXJJZCI6MzUsImRhdGUiOiIyMDE4LTEwLTE4VDExOjQ0OjE4LjcyM1oifSwiaWF0IjoxNTM5ODYzMDU4LCJleHAiOjE1NDUwNDcwNTh9.aI--gM5RUnit35NzZMeQ-Z1KC9UhvANAxx86Oz5eyLk";
+let token = '';
 class TrucksList extends Component {
 
   constructor(props) {
@@ -61,13 +61,22 @@ editTruck(val) {
 lat++;
 return lat;
  }
-
+ componentDidMount() {
+  if (localStorage.getItem('userDetails')) {
+    const Existing = localStorage.getItem('userDetails');
+    if (Existing != null) {
+      const parseExisting = JSON.parse(Existing);
+      if (parseExisting) {
+          token = parseExisting.userData.Token;
+          this.getTruck();
+      }
+    }
+  }
+}
  addCat() {
   this.props.history.push('/admin/category/add');
  }
- componentDidMount() {
-  this.getTruck();
-}
+
 getTruck() {
  let self =this;
  axios.get('/api/admin/truck',
